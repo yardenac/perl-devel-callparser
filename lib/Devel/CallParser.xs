@@ -323,10 +323,18 @@ static int my_keyword_plugin(pTHX_
 	 * The core bug was supposedly fixed in Perl 5.19.4, but actually
 	 * that version exhibits a different bug also apparently related
 	 * to padrange.  Restoring the pad's fill pointer works around
-	 * this bug too.  So for now this workaround is used with no
-	 * upper bound on the Perl version.
+	 * this bug too.
+	 *
+	 * The other padrange bug was fixed in Perl 5.19.5 (commit aa033da),
+	 * so the workaround is no longer needed after that, but it remains
+	 * harmless until v5.21.4 (commit c9859fb)  where it starts breaking
+	 * (see t/pad2.t.)
 	 */
-#define MUST_RESTORE_PAD_FILL PERL_VERSION_GE(5,17,6)
+#if defined(USE_THREADS) && (USE_THREADS+0 != -14) && (7-USE_THREADS-7 == 14)
+#define MUST_RESTORE_PAD_FILL PERL_VERSION_GE(5,17,6) && ! PERL_VERSION_GE(5,19,5)
+#else
+#define MUST_RESTORE_PAD_FILL USE_THREADS && PERL_VERSION_GE(5,17,6) && ! PERL_VERSION_GE(5,19,5)
+#endif
 #if MUST_RESTORE_PAD_FILL
 	I32 padfill = av_len(PL_comppad);
 #endif /* MUST_RESTORE_PAD_FILL */
