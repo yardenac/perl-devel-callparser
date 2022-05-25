@@ -326,7 +326,10 @@ static int my_keyword_plugin(pTHX_
 	 * this bug too.  So for now this workaround is used with no
 	 * upper bound on the Perl version.
 	 */
-#define MUST_RESTORE_PAD_FILL PERL_VERSION_GE(5,17,6)
+#define XSTR(x) STR(x)
+#define STR(x) #x
+#pragma message "The value of USE_THREADS: " XSTR(USE_THREADS)
+#define MUST_RESTORE_PAD_FILL PERL_VERSION_GE(5,17,6) && ! PERL_VERSION_GE(5,19,5)
 #if MUST_RESTORE_PAD_FILL
 	I32 padfill = av_len(PL_comppad);
 #endif /* MUST_RESTORE_PAD_FILL */
